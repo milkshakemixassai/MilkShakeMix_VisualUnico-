@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MilkShakeMiX - Cardápio Visual Único</title>
+<style>
+  body {
+    font-family: 'Fredoka One', sans-serif;
+    background-color: #fdf8f8;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  header {
+    background-color: #ff7bac;
+    color: white;
+    padding: 15px;
+    font-size: 28px;
+  }
+  .categoria {
+    margin-top: 30px;
+    font-size: 22px;
+    color: #ff7bac;
+    cursor: pointer;
+  }
+  .produtos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  .produto {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 200px;
+    padding: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .produto:hover {
+    transform: scale(1.05);
+  }
+  .produto img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+  .produto h3 {
+    font-size: 16px;
+    color: #444;
+    margin-top: 8px;
+  }
+  .detalhes {
+    padding: 20px;
+  }
+  .detalhes img {
+    width: 90%;
+    max-width: 700px;
+    border-radius: 10px;
+  }
+  .botao-voltar {
+    background-color: #ff7bac;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 15px;
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+
+<header>MilkShakeMiX - Cardápio Visual Único</header>
+<div id="conteudo"></div>
+
+<script>
+const categorias = {
+  "MilkShakes Tradicionais": ["Abacaxi", "Chocolate", "Morango"],
+  "MilkShakes Especiais": ["Ouro Branco", "Nutella"],
+  "Mix Twist": ["Pistache", "Oreo"],
+  "Mix Frutas": ["Maracujá"],
+  "Mix Chocolate": ["KitKat"],
+  "Sundae": ["Caramelo", "Pistache"],
+  "Açai Shake": ["Framboesa"],
+  "Mix Kids": ["Fini", "Brigadeiro"],
+  "Nacho": ["Pistache"]
+};
+
+function mostrarCategorias() {
+  const conteudo = document.getElementById('conteudo');
+  conteudo.innerHTML = '';
+  for (let cat in categorias) {
+    const div = document.createElement('div');
+    div.className = 'categoria';
+    div.textContent = cat;
+    div.onclick = () => mostrarProdutos(cat);
+    conteudo.appendChild(div);
+  }
+}
+
+function mostrarProdutos(categoria) {
+  const conteudo = document.getElementById('conteudo');
+  conteudo.innerHTML = `<h2>${categoria}</h2><div class='produtos'></div>`;
+  const divProdutos = conteudo.querySelector('.produtos');
+  categorias[categoria].forEach(produto => {
+    const divP = document.createElement('div');
+    divP.className = 'produto';
+    divP.innerHTML = `<img src='imagens/${categoria}/${produto}.jpg'><h3>${produto}</h3>`;
+    divP.onclick = () => mostrarDetalhes(categoria, produto);
+    divProdutos.appendChild(divP);
+  });
+  const btnVoltar = document.createElement('button');
+  btnVoltar.className = 'botao-voltar';
+  btnVoltar.textContent = 'Voltar';
+  btnVoltar.onclick = mostrarCategorias;
+  conteudo.appendChild(btnVoltar);
+}
+
+function mostrarDetalhes(categoria, produto) {
+  const conteudo = document.getElementById('conteudo');
+  conteudo.innerHTML = `
+    <div class='detalhes'>
+      <h2>${produto}</h2>
+      <img src='imagens/${categoria}/${produto}.jpg' alt='${produto}'>
+      <br>
+      <button class='botao-voltar' onclick="mostrarProdutos('${categoria}')">Voltar</button>
+    </div>`;
+}
+
+mostrarCategorias();
+</script>
+
+</body>
+</html>
