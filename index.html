@@ -1,135 +1,184 @@
-
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MilkShakeMiX - Cardápio Visual</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>MilkShakeMiX • Cardápio Visual</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #fff0f5;
-    margin: 0;
-    text-align: center;
-}
-h1 {
-    background-color: #ff66b2;
-    color: white;
-    padding: 20px;
-    margin: 0;
-}
-.category {
-    margin: 25px 0;
-}
-.category h2 {
-    color: #ff3399;
-    margin-bottom: 10px;
-}
-.grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.item {
-    background: white;
-    border-radius: 12px;
-    margin: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    width: 140px;
-    cursor: pointer;
-}
-.item img {
-    width: 100%;
-    height: 120px;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    object-fit: cover;
-}
-.item-name {
-    padding: 8px;
-    font-size: 14px;
-    font-weight: bold;
-}
-#overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.8);
-    justify-content: center;
-    align-items: center;
-}
-#overlay img {
-    max-width: 90%;
-    max-height: 80%;
-}
-#overlay button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: #ff66b2;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 6px;
-    font-size: 16px;
-}
+  :root{
+    --rosa:#ff5a9a;
+    --rosa-escuro:#e54c86;
+    --bg:#ffe9f0;
+    --txt:#333;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Ubuntu,"Noto Sans",sans-serif;background:var(--bg);color:var(--txt)}
+  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--rosa),var(--rosa-escuro));color:white;padding:22px 16px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+  header h1{margin:0;font-weight:800;letter-spacing:.5px}
+  .container{max-width:1100px;margin:24px auto;padding:0 16px}
+  .cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .cat{background:white;border-radius:14px;padding:18px 16px;font-weight:700;text-align:center;cursor:pointer;border:2px solid transparent;transition:.2s}
+  .cat:hover{border-color:#ffd0e1;transform:translateY(-2px)}
+  #voltar{display:none;margin-bottom:16px}
+  button{appearance:none;border:none;border-radius:999px;background:var(--rosa);color:#fff;padding:10px 18px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,90,154,.25)}
+  button:hover{filter:brightness(.98)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.06);display:flex;flex-direction:column}
+  .card img{width:100%;aspect-ratio:1/1.05;object-fit:cover;background:#f6f6f6}
+  .card h3{margin:10px 12px 14px;font-size:16px}
+  .empty{background:white;border-radius:14px;padding:22px;text-align:center;color:#666}
+  .hint{font-size:12px;color:#666;margin-top:4px}
+  footer{opacity:.7;text-align:center;padding:26px 0 40px}
+  /* Lightbox */
+  dialog{border:none;border-radius:14px;padding:0;max-width:92vw}
+  dialog::backdrop{background:rgba(0,0,0,.5)}
+  .lightbox img{max-width:88vw;max-height:82vh;display:block}
+  .lightbox header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#111;color:#fff}
 </style>
 </head>
 <body>
-<h1>MilkShakeMiX 🍨</h1>
-<div id="menu"></div>
-<div id="overlay">
-    <button onclick="fecharImagem()">Fechar ✖</button>
-    <img id="imagemExibida" src="" alt="">
+<header>
+  <h1>MilkShakeMiX 🍨</h1>
+</header>
+
+<div class="container" id="app">
+  <button id="voltar">← Voltar</button>
+  <h2 id="titulo">Categorias</h2>
+  <div id="lista" class="cats"></div>
 </div>
 
+<dialog id="lb">
+  <div class="lightbox">
+    <header>
+      <span id="lbtitle"></span>
+      <button onclick="lb.close()">Fechar ✕</button>
+    </header>
+    <img id="lbimg" alt=""/>
+  </div>
+</dialog>
+
 <script>
-var categorias = ['MilkShakes Tradicionais','MilkShakes Especiais','Mix Twist','Mix Frutas','Mix Chocolate','Sundae','Açai Shake','Mix Kids','Nacho'];
+/**
+ * ========================= COMO USAR (Opção 2) =========================
+ * 1) Coloque suas IMAGENS em pastas dentro de /imagens, uma para cada categoria.
+ *    Ex.: imagens/milkshakes_tradicionais/Abacaxi.jpg
+ * 2) Liste os arquivos aqui em 'CATALOGO', agrupados por categoria.
+ * 3) O arquivo funciona 100% no GitHub Pages (não depende de listar pastas do servidor).
+ *
+ * Dica: o NOME exibido é derivado do arquivo (sem extensão). Use nomes amigáveis!
+ * =======================================================================
+ */
 
-function carregarMenu() {
-    var menu = document.getElementById('menu');
-    categorias.forEach(function(cat) {
-        var divCat = document.createElement('div');
-        divCat.className = 'category';
-        var titulo = document.createElement('h2');
-        titulo.innerText = cat;
-        divCat.appendChild(titulo);
-        var grid = document.createElement('div');
-        grid.className = 'grid';
+/* Mapeamento manual (você pode editar livremente): */
+const CATALOGO = {
+  "MilkShakes Tradicionais": [
+    // "Abacaxi.jpg","Morango.jpg"
+  ],
+  "MilkShakes Especiais": [
+  ],
+  "Mix Twist": [
+    // "Laka Oreo.jpg","Ouro Branco.jpg","Sonho de Valsa.jpg"
+  ],
+  "Mix Frutas": [
+  ],
+  "Mix Chocolate": [
+  ],
+  "Sundae": [
+  ],
+  "Açaí Shake": [
+  ],
+  "Mix Kids": [
+  ],
+  "Nacho": [
+  ]
+};
 
-        // Padrão local: listar imagens manualmente
-        fetch('imagens/' + cat + '/')
-        .then(response => response.text())
-        .then(text => {
-            var parser = new DOMParser();
-            var htmlDoc = parser.parseFromString(text, 'text/html');
-            var links = htmlDoc.querySelectorAll('a');
-            links.forEach(function(link) {
-                var href = link.getAttribute('href');
-                if (href && (href.endsWith('.jpg') || href.endsWith('.png'))) {
-                    var nome = decodeURIComponent(href.split('/').pop().split('.')[0]);
-                    var item = document.createElement('div');
-                    item.className = 'item';
-                    item.innerHTML = '<img src="imagens/' + cat + '/' + href + '" alt="' + nome + '"><div class="item-name">' + nome + '</div>';
-                    item.onclick = function() { abrirImagem('imagens/' + cat + '/' + href); };
-                    grid.appendChild(item);
-                }
-            });
-        });
-        divCat.appendChild(grid);
-        menu.appendChild(divCat);
-    });
+/* Pastas (slug) mapeadas por categoria — pode ajustar se quiser outros nomes de pasta */
+const FOLDER = (cat)=> cat
+  .normalize('NFD').replace(/[̀-ͯ]/g,'')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g,'_')
+  .replace(/^_|_$/g,'');
+
+/* Estado */
+const elTitulo = document.getElementById('titulo');
+const elLista  = document.getElementById('lista');
+const elVoltar = document.getElementById('voltar');
+const lb       = document.getElementById('lb');
+const lbimg    = document.getElementById('lbimg');
+const lbtitle  = document.getElementById('lbtitle');
+
+/* Renderiza categorias */
+function renderCategorias(){
+  elTitulo.textContent = 'Categorias';
+  elVoltar.style.display = 'none';
+  elLista.className = 'cats';
+  elLista.innerHTML = '';
+  Object.keys(CATALOGO).forEach(cat=>{
+    const div = document.createElement('div');
+    div.className = 'cat';
+    div.textContent = cat;
+    div.onclick = ()=>renderProdutos(cat);
+    elLista.appendChild(div);
+  });
 }
 
-function abrirImagem(src) {
-    document.getElementById('imagemExibida').src = src;
-    document.getElementById('overlay').style.display = 'flex';
-}
-function fecharImagem() {
-    document.getElementById('overlay').style.display = 'none';
+/* Renderiza produtos de uma categoria */
+function renderProdutos(cat){
+  elTitulo.textContent = cat;
+  elVoltar.style.display = 'inline-block';
+  elLista.className = 'grid';
+  elLista.innerHTML = '';
+
+  const arquivos = CATALOGO[cat] || [];
+  if(arquivos.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.innerHTML = `Nenhum item cadastrado ainda.<div class="hint">
+      Adicione imagens na pasta <b>imagens/${FOLDER(cat)}/</b> e liste os nomes aqui no CATALOGO.
+    </div>`;
+    elLista.appendChild(empty);
+    return;
+  }
+
+  arquivos.forEach(file=>{
+    const nome = file.replace(/\.[^.]+$/,'');
+    const card = document.createElement('div');
+    card.className = 'card';
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.alt = nome;
+    img.src = `imagens/${FOLDER(cat)}/${encodeURIComponent(file)}`;
+    img.onerror = ()=>{ img.src = 'data:image/svg+xml;utf8,'+encodeURIComponent(svgFallback(nome)); };
+    const h3 = document.createElement('h3');
+    h3.textContent = nome;
+    card.appendChild(img);
+    card.appendChild(h3);
+    card.onclick = ()=>openLightbox(nome, img.src);
+    elLista.appendChild(card);
+  });
 }
 
-carregarMenu();
+function openLightbox(titulo, src){
+  lbtitle.textContent = titulo;
+  lbimg.src = src;
+  lb.showModal();
+}
+
+function svgFallback(text){
+  return `
+  <svg xmlns="http://www.w3.org/2000/svg" width="600" height="550">
+    <rect width="100%" height="100%" fill="#f1f1f1"/>
+    <text x="50%" y="50%" text-anchor="middle" font-size="28" font-family="Arial" fill="#999">${text}</text>
+    <text x="50%" y="86%" text-anchor="middle" font-size="14" font-family="Arial" fill="#bbb">imagem não encontrada</text>
+  </svg>`;
+}
+
+/* Voltar */
+elVoltar.onclick = renderCategorias;
+
+/* Inicial */
+renderCategorias();
 </script>
 </body>
 </html>
