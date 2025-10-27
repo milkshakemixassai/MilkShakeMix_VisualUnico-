@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MilkShakeMiX - Cardápio Visual</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff0f5;
+    margin: 0;
+    text-align: center;
+}
+h1 {
+    background-color: #ff66b2;
+    color: white;
+    padding: 20px;
+    margin: 0;
+}
+.category {
+    margin: 25px 0;
+}
+.category h2 {
+    color: #ff3399;
+    margin-bottom: 10px;
+}
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.item {
+    background: white;
+    border-radius: 12px;
+    margin: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 140px;
+    cursor: pointer;
+}
+.item img {
+    width: 100%;
+    height: 120px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    object-fit: cover;
+}
+.item-name {
+    padding: 8px;
+    font-size: 14px;
+    font-weight: bold;
+}
+#overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+}
+#overlay img {
+    max-width: 90%;
+    max-height: 80%;
+}
+#overlay button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #ff66b2;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 16px;
+}
+</style>
+</head>
+<body>
+<h1>MilkShakeMiX 🍨</h1>
+<div id="menu"></div>
+<div id="overlay">
+    <button onclick="fecharImagem()">Fechar ✖</button>
+    <img id="imagemExibida" src="" alt="">
+</div>
+
+<script>
+var categorias = ['MilkShakes Tradicionais','MilkShakes Especiais','Mix Twist','Mix Frutas','Mix Chocolate','Sundae','Açai Shake','Mix Kids','Nacho'];
+
+function carregarMenu() {
+    var menu = document.getElementById('menu');
+    categorias.forEach(function(cat) {
+        var divCat = document.createElement('div');
+        divCat.className = 'category';
+        var titulo = document.createElement('h2');
+        titulo.innerText = cat;
+        divCat.appendChild(titulo);
+        var grid = document.createElement('div');
+        grid.className = 'grid';
+
+        // Padrão local: listar imagens manualmente
+        fetch('imagens/' + cat + '/')
+        .then(response => response.text())
+        .then(text => {
+            var parser = new DOMParser();
+            var htmlDoc = parser.parseFromString(text, 'text/html');
+            var links = htmlDoc.querySelectorAll('a');
+            links.forEach(function(link) {
+                var href = link.getAttribute('href');
+                if (href && (href.endsWith('.jpg') || href.endsWith('.png'))) {
+                    var nome = decodeURIComponent(href.split('/').pop().split('.')[0]);
+                    var item = document.createElement('div');
+                    item.className = 'item';
+                    item.innerHTML = '<img src="imagens/' + cat + '/' + href + '" alt="' + nome + '"><div class="item-name">' + nome + '</div>';
+                    item.onclick = function() { abrirImagem('imagens/' + cat + '/' + href); };
+                    grid.appendChild(item);
+                }
+            });
+        });
+        divCat.appendChild(grid);
+        menu.appendChild(divCat);
+    });
+}
+
+function abrirImagem(src) {
+    document.getElementById('imagemExibida').src = src;
+    document.getElementById('overlay').style.display = 'flex';
+}
+function fecharImagem() {
+    document.getElementById('overlay').style.display = 'none';
+}
+
+carregarMenu();
+</script>
+</body>
+</html>
