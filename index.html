@@ -15,25 +15,39 @@
   }
   #wrap{ max-width:1100px; margin:20px auto; padding:0 14px; }
 
-  .cats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
-  .cat{
-    background:#fff; border-radius:12px; padding:16px; font-weight:bold; color:#ff3399;
-    cursor:pointer; border:2px solid transparent;
+  /* BOTÕES (Categorias e Sabores) */
+  .btn{
+    background:#ff5fa2;
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:12px 18px;
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+    transition:all .2s;
+    white-space:nowrap;
   }
-  .cat:hover{ border-color:#ffd3e6; }
+  .btn:hover{ filter:brightness(.95); transform:scale(1.05); }
+  .btn.active{
+    background:#e94f8a;
+    transform:scale(1.07);
+    box-shadow:0 0 8px rgba(0,0,0,0.2);
+  }
+
+  /* Grade flexível para botões */
+  .flex{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    justify-content:center;
+    align-items:center;
+  }
 
   #titulo{ margin:8px 0 14px; color:#ff3399; }
-  .flavors{
-    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0 18px;
-  }
-  .btn{
-    background:#ff5fa2; color:#fff; border:none; border-radius:999px; padding:10px 14px;
-    font-weight:bold; cursor:pointer;
-  }
-  .btn:hover{ filter:brightness(.95); }
-  #voltar{ display:none; margin:6px 0 14px; }
+  #voltar{ display:none; margin:10px auto; }
 
-  /* 🔧 Ajuste da imagem para caber perfeitamente na tela do iPad */
+  /* Imagem responsiva */
   #viewer{
     display:none;
     margin:10px auto 22px;
@@ -59,7 +73,7 @@
 <div id="wrap">
   <button id="voltar" class="btn" onclick="renderCategorias()">← Voltar</button>
   <h2 id="titulo">Categorias</h2>
-  <div id="lista" class="cats"></div>
+  <div id="lista" class="flex"></div>
 
   <div id="viewer">
     <img id="imgView" src="" alt="">
@@ -72,8 +86,8 @@ var CATALOGO = {
   "MilkShakes Tradicionais": [
     "Abacaxi.jpg",
     "Abacaxi ao Vinho.jpg",
-    "Abacaxi com Hortela.jpg",
-    "Algodao Doce.jpg"
+    "Abacaxi com Hortelã.jpg",
+    "Algodão Doce.jpg"
   ],
   "MilkShakes Especiais": [],
   "Mix Twist": [],
@@ -98,21 +112,30 @@ var elVoltar = document.getElementById('voltar');
 var elViewer = document.getElementById('viewer');
 var elImg    = document.getElementById('imgView');
 var elImgName= document.getElementById('imgName');
+var categoriaAtiva = null;
 
 function renderCategorias(){
   elTitulo.innerHTML = 'Categorias';
   elVoltar.style.display = 'none';
   elViewer.style.display = 'none';
-  elLista.className = 'cats';
+  elLista.className = 'flex';
   elLista.innerHTML = '';
+  categoriaAtiva = null;
 
   for (var cat in CATALOGO){
     if (!CATALOGO.hasOwnProperty(cat)) continue;
-    var div = document.createElement('div');
-    div.className = 'cat';
-    div.innerHTML = cat;
-    div.onclick = (function(c){ return function(){ renderSabores(c); }; })(cat);
-    elLista.appendChild(div);
+    var btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.innerHTML = cat;
+    btn.onclick = (function(c, b){
+      return function(){
+        categoriaAtiva = c;
+        renderSabores(c);
+        document.querySelectorAll('.btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+      };
+    })(cat, btn);
+    elLista.appendChild(btn);
   }
 }
 
@@ -120,7 +143,7 @@ function renderSabores(cat){
   elTitulo.innerHTML = cat;
   elVoltar.style.display = 'inline-block';
   elViewer.style.display = 'none';
-  elLista.className = '';
+  elLista.className = 'flex';
   elLista.innerHTML = '';
 
   var sabores = CATALOGO[cat] || [];
@@ -132,10 +155,6 @@ function renderSabores(cat){
     return;
   }
 
-  var faixa = document.createElement('div');
-  faixa.className = 'flavors';
-  elLista.appendChild(faixa);
-
   for (var i=0;i<sabores.length;i++){
     var file = sabores[i];
     var nome = file.replace(/\.[^.]+$/,'');
@@ -145,7 +164,7 @@ function renderSabores(cat){
     btn.onclick = (function(catLocal, fileLocal, nomeLocal){
       return function(){ mostrarImagem(catLocal, fileLocal, nomeLocal); };
     })(cat, file, nome);
-    faixa.appendChild(btn);
+    elLista.appendChild(btn);
   }
 }
 
@@ -162,4 +181,3 @@ renderCategorias();
 </script>
 </body>
 </html>
-
