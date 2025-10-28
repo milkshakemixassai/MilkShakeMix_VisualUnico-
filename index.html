@@ -35,7 +35,6 @@
     box-shadow:0 0 8px rgba(0,0,0,0.2);
   }
 
-  /* Grade flexível para botões */
   .flex{
     display:flex;
     flex-wrap:wrap;
@@ -47,20 +46,19 @@
   #titulo{ margin:8px 0 14px; color:#ff3399; }
   #voltar{ display:none; margin:10px auto; }
 
-  /* Imagem responsiva */
   #viewer{
     display:none;
     margin:10px auto 22px;
     overflow:hidden;
   }
   #viewer img{
-    max-width: 100%;
-    max-height: 85vh;
-    height: auto;
-    width: auto;
-    object-fit: contain;
-    border-radius: 12px;
-    box-shadow: 0 6px 22px rgba(0,0,0,.15);
+    max-width:100%;
+    max-height:85vh;
+    height:auto;
+    width:auto;
+    object-fit:contain;
+    border-radius:12px;
+    box-shadow:0 6px 22px rgba(0,0,0,.15);
     background:#f6f6f6;
   }
 
@@ -101,7 +99,7 @@ var CATALOGO = {
 
 function folderFromCategory(cat){
   var s = cat;
-  s = s.normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : s;
+  if (s.normalize) s = s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   s = s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
   return s;
 }
@@ -114,6 +112,13 @@ var elImg    = document.getElementById('imgView');
 var elImgName= document.getElementById('imgName');
 var categoriaAtiva = null;
 
+function limparAtivos(){
+  var botoes = document.getElementsByClassName('btn');
+  for(var i=0;i<botoes.length;i++){
+    botoes[i].className = botoes[i].className.replace(' active','');
+  }
+}
+
 function renderCategorias(){
   elTitulo.innerHTML = 'Categorias';
   elVoltar.style.display = 'none';
@@ -124,18 +129,18 @@ function renderCategorias(){
 
   for (var cat in CATALOGO){
     if (!CATALOGO.hasOwnProperty(cat)) continue;
-    var btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.innerHTML = cat;
-    btn.onclick = (function(c, b){
-      return function(){
+    (function(c){
+      var btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.innerHTML = c;
+      btn.onclick = function(){
+        limparAtivos();
+        btn.className += ' active';
         categoriaAtiva = c;
         renderSabores(c);
-        document.querySelectorAll('.btn').forEach(x=>x.classList.remove('active'));
-        b.classList.add('active');
       };
-    })(cat, btn);
-    elLista.appendChild(btn);
+      elLista.appendChild(btn);
+    })(cat);
   }
 }
 
@@ -156,15 +161,17 @@ function renderSabores(cat){
   }
 
   for (var i=0;i<sabores.length;i++){
-    var file = sabores[i];
-    var nome = file.replace(/\.[^.]+$/,'');
-    var btn  = document.createElement('button');
-    btn.className = 'btn';
-    btn.innerHTML = nome;
-    btn.onclick = (function(catLocal, fileLocal, nomeLocal){
-      return function(){ mostrarImagem(catLocal, fileLocal, nomeLocal); };
-    })(cat, file, nome);
-    elLista.appendChild(btn);
+    (function(i){
+      var file = sabores[i];
+      var nome = file.replace(/\.[^.]+$/,'');
+      var btn  = document.createElement('button');
+      btn.className = 'btn';
+      btn.innerHTML = nome;
+      btn.onclick = function(){
+        mostrarImagem(cat, file, nome);
+      };
+      elLista.appendChild(btn);
+    })(i);
   }
 }
 
