@@ -4,114 +4,185 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MilkShakeMiX</title>
+<title>MilkShakeMiX • Cardápio Visual</title>
 <style>
-body {
-  background-color: #ffeaf3;
-  color: #ff3399;
-  font-family: Arial, Helvetica, sans-serif;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-}
-header {
-  background-color: #ff5fa2;
-  padding: 20px 0;
-  font-size: 28px;
-  font-weight: bold;
-  color: white;
-}
-.categoria {
-  margin: 20px auto;
-  font-size: 22px;
-  font-weight: bold;
-  color: #ff3399;
-  cursor: pointer;
-}
-.galeria {
-  display: none;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 20px;
-}
-.galeria img {
-  width: 250px;
-  height: auto;
-  margin: 10px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-.botao-voltar {
-  display: none;
-  margin: 20px;
-  background-color: #ff5fa2;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 18px;
-  cursor: pointer;
-}
+  body{
+    margin:0; text-align:center; background:#ffeaf3; color:#333;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  header{
+    background:#ff5fa2; color:#fff; padding:18px 10px; font-size:26px; font-weight:bold;
+  }
+  #wrap{ max-width:1100px; margin:20px auto; padding:0 14px; }
+  /* Categorias (grade de cartões clicáveis) */
+  .cats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+  .cat{
+    background:#fff; border-radius:12px; padding:16px; font-weight:bold; color:#ff3399;
+    cursor:pointer; border:2px solid transparent;
+  }
+  .cat:hover{ border-color:#ffd3e6; }
+
+  /* Área de sabores (botões) */
+  #titulo{ margin:8px 0 14px; color:#ff3399; }
+  .flavors{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0 18px;
+  }
+  .btn{
+    background:#ff5fa2; color:#fff; border:none; border-radius:999px; padding:10px 14px;
+    font-weight:bold; cursor:pointer;
+  }
+  .btn:hover{ filter:brightness(.95); }
+  #voltar{ display:none; margin:6px 0 14px; }
+
+  /* Imagem exibida */
+  #viewer{ display:none; margin:10px auto 22px; }
+  #viewer img{
+    width: min(100%, 900px);
+    max-height: 82vh;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 22px rgba(0,0,0,.15);
+    background:#f6f6f6;
+  }
+
+  /* Mensagens/ajudas */
+  .hint{ color:#666; font-size:13px; margin-top:6px; }
 </style>
 </head>
 <body>
 <header>MilkShakeMiX 🍨</header>
-<div id="categorias">
-  <div class="categoria" onclick="mostrarCategoria('milkshakes_tradicionais')">MilkShakes Tradicionais</div>
-  <div class="categoria" onclick="mostrarCategoria('milkshakes_especiais')">MilkShakes Especiais</div>
-  <div class="categoria" onclick="mostrarCategoria('mix_twist')">Mix Twist</div>
-  <div class="categoria" onclick="mostrarCategoria('mix_frutas')">Mix Frutas</div>
-  <div class="categoria" onclick="mostrarCategoria('mix_chocolate')">Mix Chocolate</div>
-  <div class="categoria" onclick="mostrarCategoria('sundae')">Sundae</div>
-  <div class="categoria" onclick="mostrarCategoria('acai_shake')">Açaí Shake</div>
-  <div class="categoria" onclick="mostrarCategoria('mix_kids')">Mix Kids</div>
-  <div class="categoria" onclick="mostrarCategoria('nacho')">Nacho</div>
+
+<div id="wrap">
+  <button id="voltar" class="btn" onclick="renderCategorias()">← Voltar</button>
+  <h2 id="titulo">Categorias</h2>
+  <div id="lista" class="cats"></div>
+
+  <div id="viewer">
+    <img id="imgView" src="" alt="">
+    <div class="hint" id="imgName"></div>
+  </div>
 </div>
 
-<!-- Galerias -->
-<div id="galeria" class="galeria"></div>
-<button id="voltar" class="botao-voltar" onclick="voltarCategorias()">Voltar</button>
-
 <script>
-// Estrutura de categorias e imagens
+/* ========================= COMO USAR =========================
+  1) Mantenha as pastas dentro de /imagens com estes nomes:
+     acai_shake, milkshakes_especiais, milkshakes_tradicionais,
+     mix_chocolate, mix_frutas, mix_kids, mix_twist, nacho, sundae
+
+  2) Coloque as imagens (produto+ingredientes+preparo) nas pastas
+     correspondentes e liste os ARQUIVOS (com extensão) abaixo.
+
+  3) Ex.: "Abacaxi.jpg" em imagens/milkshakes_tradicionais/Abacaxi.jpg
+     O nome mostrado no botão virá do arquivo sem a extensão.
+============================================================== */
+
+/* LISTE AQUI os arquivos de cada categoria (com extensão) */
 var CATALOGO = {
-  "milkshakes_tradicionais": ["Abacaxi.jpg"],
-  "milkshakes_especiais": [],
-  "mix_twist": ["Laka Oreo.jpg", "Ouro Branco.jpg", "Sonho de Valsa.jpg"],
-  "mix_frutas": [],
-  "mix_chocolate": [],
-  "sundae": [],
-  "acai_shake": [],
-  "mix_kids": [],
-  "nacho": []
+  "MilkShakes Tradicionais": [
+    "Abacaxi.jpg"
+    /* "Morango.jpg","Chocolate.jpg", ... */
+  ],
+  "MilkShakes Especiais": [
+    /* "Nutella.jpg","Oreo.jpg" ... */
+  ],
+  "Mix Twist": [
+    /* "Laka Oreo.jpg","Ouro Branco.jpg","Sonho de Valsa.jpg" */
+  ],
+  "Mix Frutas": [
+  ],
+  "Mix Chocolate": [
+  ],
+  "Sundae": [
+  ],
+  "Açaí Shake": [
+  ],
+  "Mix Kids": [
+  ],
+  "Nacho": [
+  ]
 };
 
-function mostrarCategoria(categoria) {
-  document.getElementById('categorias').style.display = 'none';
-  document.getElementById('galeria').style.display = 'flex';
-  document.getElementById('voltar').style.display = 'inline-block';
+/* Converte nome da categoria -> nome de pasta (slug) */
+function folderFromCategory(cat){
+  var s = cat;
+  // remover acentos
+  s = s.normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : s; 
+  s = s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+  return s;
+}
 
-  var galeria = document.getElementById('galeria');
-  galeria.innerHTML = '';
-  
-  var imagens = CATALOGO[categoria];
-  if (imagens && imagens.length > 0) {
-    for (var i = 0; i < imagens.length; i++) {
-      var img = document.createElement('img');
-      img.src = 'imagens/' + categoria + '/' + imagens[i];
-      img.alt = imagens[i];
-      galeria.appendChild(img);
-    }
-  } else {
-    galeria.innerHTML = '<p style="color:#666;font-size:18px;">Nenhuma imagem encontrada nesta categoria.</p>';
+/* Estado / elementos */
+var elTitulo = document.getElementById('titulo');
+var elLista  = document.getElementById('lista');
+var elVoltar = document.getElementById('voltar');
+var elViewer = document.getElementById('viewer');
+var elImg    = document.getElementById('imgView');
+var elImgName= document.getElementById('imgName');
+
+/* Tela inicial: categorias */
+function renderCategorias(){
+  elTitulo.innerHTML = 'Categorias';
+  elVoltar.style.display = 'none';
+  elViewer.style.display = 'none';
+  elLista.className = 'cats';
+  elLista.innerHTML = '';
+
+  for (var cat in CATALOGO){
+    if (!CATALOGO.hasOwnProperty(cat)) continue;
+    var div = document.createElement('div');
+    div.className = 'cat';
+    div.innerHTML = cat;
+    div.onclick = (function(c){ return function(){ renderSabores(c); }; })(cat);
+    elLista.appendChild(div);
   }
 }
 
-function voltarCategorias() {
-  document.getElementById('galeria').style.display = 'none';
-  document.getElementById('voltar').style.display = 'none';
-  document.getElementById('categorias').style.display = 'block';
+/* Ao clicar numa categoria: mostra BOTÕES dos sabores */
+function renderSabores(cat){
+  elTitulo.innerHTML = cat;
+  elVoltar.style.display = 'inline-block';
+  elViewer.style.display = 'none';
+  elLista.className = '';
+  elLista.innerHTML = '';
+
+  var sabores = CATALOGO[cat] || [];
+  if (!sabores.length){
+    var p = document.createElement('div');
+    p.className = 'hint';
+    p.innerHTML = 'Nenhum sabor cadastrado ainda.<br>Adicione imagens em <b>imagens/' + folderFromCategory(cat) + '/</b> e liste os arquivos no CATALOGO.';
+    elLista.appendChild(p);
+    return;
+  }
+
+  var faixa = document.createElement('div');
+  faixa.className = 'flavors';
+  elLista.appendChild(faixa);
+
+  for (var i=0;i<sabores.length;i++){
+    var file = sabores[i];                  // ex.: "Abacaxi.jpg"
+    var nome = file.replace(/\.[^.]+$/,''); // "Abacaxi"
+    var btn  = document.createElement('button');
+    btn.className = 'btn';
+    btn.innerHTML = nome;
+    btn.onclick = (function(catLocal, fileLocal, nomeLocal){
+      return function(){ mostrarImagem(catLocal, fileLocal, nomeLocal); };
+    })(cat, file, nome);
+    faixa.appendChild(btn);
+  }
 }
+
+/* Mostra a imagem do sabor selecionado */
+function mostrarImagem(cat, file, nome){
+  var folder = folderFromCategory(cat); // ex.: milkshakes_tradicionais
+  var src = 'imagens/' + folder + '/' + encodeURIComponent(file);
+  elImg.src = src;
+  elImg.alt = nome;
+  elImgName.innerHTML = nome;
+  elViewer.style.display = 'block';
+}
+
+/* Iniciar na tela de categorias */
+renderCategorias();
 </script>
 </body>
 </html>
