@@ -14,7 +14,7 @@
     background:#ff5fa2; color:#fff; padding:18px 10px; font-size:26px; font-weight:bold;
   }
   #wrap{ max-width:1100px; margin:20px auto; padding:0 14px; }
-  /* Categorias (grade de cartões clicáveis) */
+
   .cats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
   .cat{
     background:#fff; border-radius:12px; padding:16px; font-weight:bold; color:#ff3399;
@@ -22,7 +22,6 @@
   }
   .cat:hover{ border-color:#ffd3e6; }
 
-  /* Área de sabores (botões) */
   #titulo{ margin:8px 0 14px; color:#ff3399; }
   .flavors{
     display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0 18px;
@@ -34,18 +33,23 @@
   .btn:hover{ filter:brightness(.95); }
   #voltar{ display:none; margin:6px 0 14px; }
 
-  /* Imagem exibida */
-  #viewer{ display:none; margin:10px auto 22px; }
+  /* 🔧 Ajuste da imagem para caber perfeitamente na tela do iPad */
+  #viewer{
+    display:none;
+    margin:10px auto 22px;
+    overflow:hidden;
+  }
   #viewer img{
-    width: min(100%, 900px);
-    max-height: 82vh;
+    max-width: 100%;
+    max-height: 85vh;
     height: auto;
+    width: auto;
+    object-fit: contain;
     border-radius: 12px;
     box-shadow: 0 6px 22px rgba(0,0,0,.15);
     background:#f6f6f6;
   }
 
-  /* Mensagens/ajudas */
   .hint{ color:#666; font-size:13px; margin-top:6px; }
 </style>
 </head>
@@ -64,54 +68,30 @@
 </div>
 
 <script>
-/* ========================= COMO USAR =========================
-  1) Mantenha as pastas dentro de /imagens com estes nomes:
-     acai_shake, milkshakes_especiais, milkshakes_tradicionais,
-     mix_chocolate, mix_frutas, mix_kids, mix_twist, nacho, sundae
-
-  2) Coloque as imagens (produto+ingredientes+preparo) nas pastas
-     correspondentes e liste os ARQUIVOS (com extensão) abaixo.
-
-  3) Ex.: "Abacaxi.jpg" em imagens/milkshakes_tradicionais/Abacaxi.jpg
-     O nome mostrado no botão virá do arquivo sem a extensão.
-============================================================== */
-
-/* LISTE AQUI os arquivos de cada categoria (com extensão) */
 var CATALOGO = {
   "MilkShakes Tradicionais": [
-    "Abacaxi.jpg","Abacaxi ao Vinho.jpg","Abacaxi com Hortela.jpg","Algodao Doce.jpg"
-    /* "Morango.jpg","Chocolate.jpg", ... */
+    "Abacaxi.jpg",
+    "Abacaxi ao Vinho.jpg",
+    "Abacaxi com Hortelã.jpg",
+    "Algodão Doce.jpg"
   ],
-  "MilkShakes Especiais": [
-    /* "Nutella.jpg","Oreo.jpg" ... */
-  ],
-  "Mix Twist": [
-    /* "Laka Oreo.jpg","Ouro Branco.jpg","Sonho de Valsa.jpg" */
-  ],
-  "Mix Frutas": [
-  ],
-  "Mix Chocolate": [
-  ],
-  "Sundae": [
-  ],
-  "Açaí Shake": [
-  ],
-  "Mix Kids": [
-  ],
-  "Nacho": [
-  ]
+  "MilkShakes Especiais": [],
+  "Mix Twist": [],
+  "Mix Frutas": [],
+  "Mix Chocolate": [],
+  "Sundae": [],
+  "Açaí Shake": [],
+  "Mix Kids": [],
+  "Nacho": []
 };
 
-/* Converte nome da categoria -> nome de pasta (slug) */
 function folderFromCategory(cat){
   var s = cat;
-  // remover acentos
-  s = s.normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : s; 
+  s = s.normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g,'') : s;
   s = s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
   return s;
 }
 
-/* Estado / elementos */
 var elTitulo = document.getElementById('titulo');
 var elLista  = document.getElementById('lista');
 var elVoltar = document.getElementById('voltar');
@@ -119,7 +99,6 @@ var elViewer = document.getElementById('viewer');
 var elImg    = document.getElementById('imgView');
 var elImgName= document.getElementById('imgName');
 
-/* Tela inicial: categorias */
 function renderCategorias(){
   elTitulo.innerHTML = 'Categorias';
   elVoltar.style.display = 'none';
@@ -137,7 +116,6 @@ function renderCategorias(){
   }
 }
 
-/* Ao clicar numa categoria: mostra BOTÕES dos sabores */
 function renderSabores(cat){
   elTitulo.innerHTML = cat;
   elVoltar.style.display = 'inline-block';
@@ -159,8 +137,8 @@ function renderSabores(cat){
   elLista.appendChild(faixa);
 
   for (var i=0;i<sabores.length;i++){
-    var file = sabores[i];                  // ex.: "Abacaxi.jpg"
-    var nome = file.replace(/\.[^.]+$/,''); // "Abacaxi"
+    var file = sabores[i];
+    var nome = file.replace(/\.[^.]+$/,'');
     var btn  = document.createElement('button');
     btn.className = 'btn';
     btn.innerHTML = nome;
@@ -171,9 +149,8 @@ function renderSabores(cat){
   }
 }
 
-/* Mostra a imagem do sabor selecionado */
 function mostrarImagem(cat, file, nome){
-  var folder = folderFromCategory(cat); // ex.: milkshakes_tradicionais
+  var folder = folderFromCategory(cat);
   var src = 'imagens/' + folder + '/' + encodeURIComponent(file);
   elImg.src = src;
   elImg.alt = nome;
@@ -181,9 +158,7 @@ function mostrarImagem(cat, file, nome){
   elViewer.style.display = 'block';
 }
 
-/* Iniciar na tela de categorias */
 renderCategorias();
 </script>
 </body>
 </html>
-
