@@ -1,6 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <style id="msm-auth-style">html{visibility:hidden}</style>
+<script type="text/javascript">
+(function () {
+  var senhaCorreta = "201025";
+  var chave = "msm_acesso_liberado";
+  var liberado = false;
+
+  try {
+    liberado = window.sessionStorage && sessionStorage.getItem(chave) === "sim";
+  } catch (e) {}
+
+  while (!liberado) {
+    var senha = window.prompt("Digite a senha para acessar as receitas:");
+
+    if (senha === senhaCorreta) {
+      liberado = true;
+      try {
+        sessionStorage.setItem(chave, "sim");
+      } catch (e2) {}
+    } else if (senha === null) {
+      window.location.replace("about:blank");
+      return;
+    } else {
+      window.alert("Senha incorreta.");
+    }
+  }
+
+  var bloqueio = document.getElementById("msm-auth-style");
+  if (bloqueio && bloqueio.parentNode) {
+    bloqueio.parentNode.removeChild(bloqueio);
+  }
+}());
+</script>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
