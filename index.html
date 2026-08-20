@@ -264,8 +264,19 @@ var CATALOGO = {
 };
 
 function folderFromCategory(cat){
+  if (cat === 'Ice Coffee Mix') return 'Ice Coffee Mix';
+
+  // A categoria aparece como Açai/Açaí,
+  // mas a pasta física continua sendo "acai"
+  if (cat === 'Açai' || cat === 'Açaí' || cat === 'Acai') {
+    return 'acai';
+  }
+
   var s = cat;
-  s = s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+  s = s.toLowerCase()
+       .replace(/[^a-z0-9]+/g,'_')
+       .replace(/^_|_$/g,'');
+
   return s;
 }
 
